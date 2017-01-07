@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 
+import java.util.Map;
+
 /**
  * @author Aidan Follestad (afollestad)
  */
@@ -47,8 +49,8 @@ public class Discovery extends Base {
     }
 
     public Discovery discover(@NonNull EntityListener listener, @Nullable ErrorListener onerror) {
-        entityListener = listener;
-        senderErrorListener = onerror;
+        this.entityListener = listener;
+        this.senderErrorListener = onerror;
         startReceiver();
         refresh();
         return this;
@@ -60,10 +62,29 @@ public class Discovery extends Base {
     }
 
     public Discovery respond(@NonNull RequestListener listener, @Nullable ErrorListener onerror) {
-        requestListener = listener;
-        receiverErrorListener = onerror;
+        this.requestListener = listener;
+        this.receiverErrorListener = onerror;
         startReceiver();
         return this;
+    }
+
+    public Discovery respondToAll() {
+        return respondToAll(null);
+    }
+
+    public Discovery respondToAll(@Nullable ErrorListener onerror) {
+        return respond(new RequestListener() {
+            @Override public boolean onRequest(Entity entity) {
+                return true;
+            }
+        }, onerror);
+    }
+
+    public void message(@NonNull Entity to, @NonNull Map<String, String> payload, @Nullable ErrorListener onerror) {
+        Message message = Message.create()
+                .payload(payload)
+                .build();
+        sendPacket(to.address(), message, Message.class, onerror);
     }
 
     public static void destroy() {

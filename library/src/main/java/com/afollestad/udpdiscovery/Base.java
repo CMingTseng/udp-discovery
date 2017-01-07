@@ -3,6 +3,7 @@ package com.afollestad.udpdiscovery;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 
 import com.google.gson.Gson;
@@ -14,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * @author Aidan Follestad (afollestad)
@@ -32,11 +34,11 @@ class Base {
     EntityListener entityListener;
     RequestListener requestListener;
 
-
     @UiThread Base(Context context) {
         this.context = context;
         this.handler = new Handler();
         this.gson = new GsonBuilder()
+                .enableComplexMapKeySerialization()
                 .registerTypeAdapterFactory(AdapterFactory.create())
                 .create();
     }
@@ -73,10 +75,29 @@ class Base {
             Util.handleError(senderErrorListener, e, "Failed to get the broadcast address!");
             return;
         }
-        sendPacket(broadcastAdr, object, cls);
+        sendPacket(broadcastAdr, object, cls, senderErrorListener);
     }
 
-    void sendPacket(@NonNull InetAddress to, @NonNull Object object, @NonNull Class<?> cls) {
+    void sendPacket(@NonNull String toAdr, @NonNull Object object, @NonNull Class<?> cls,
+                    @Nullable ErrorListener onerror) {
+        if(onerror == null) {
+            onerror = senderErrorListener;
+        }
+        InetAddress address;
+        try {
+            address = InetAddress.getByName(toAdr);
+        } catch (UnknownHostException e) {
+            Util.handleError(onerror, e, "Unable to parse destination IP: " + toAdr);
+            return;
+        }
+        sendPacket(address, object, cls, onerror);
+    }
+
+    private void sendPacket(@NonNull InetAddress to, @NonNull Object object, @NonNull Class<?> cls,
+                            @Nullable ErrorListener onerror) {
+        if(onerror == null) {
+            onerror = senderErrorListener;
+        }
         createSenderSocket();
 
         String jsonData = gson.toJson(object, cls);
@@ -84,14 +105,18 @@ class Base {
         try {
             sendData = jsonData.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            Util.handleError(senderErrorListener, e, "Failed to encode string to UTF-8 data!");
+            Util.handleError(onerror, e, "Failed to encode string to UTF-8 data!");
+            return;
+        }
+        if (sendData.length > Constants.BUFFER_SIZE) {
+            Util.handleError(onerror, new Exception("Transmission packets cannot be more than 1024 bytes in length."), null);
             return;
         }
         DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, to, Constants.PORT);
         try {
             senderSocket.send(sendPacket);
         } catch (IOException e) {
-            Util.handleError(senderErrorListener, e, "Failed to send a packet!");
+            Util.handleError(onerror, e, "Failed to send a packet!");
         }
     }
 
@@ -154,7 +179,7 @@ class Base {
                                             .version(BuildConfig.VERSION_CODE)
                                             .type(RequestType.RESPOND)
                                             .build();
-                                    sendPacket(fromAdr, response, Request.class);
+                                    sendPacket(fromAdr, response, Request.class, null);
                                 }
                             } else if (request.type().equals(RequestType.RESPOND) && entityListener != null) {
                                 // Discovered an entity

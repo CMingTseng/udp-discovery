@@ -34,6 +34,20 @@ the requester. This is sent directly to the requester, *not* as a broadcast.
 }
 ```
 
+### Short Message
+
+You can exchange short messages directly with entities. A payload object can contain whatever you'd like,
+the values need to be strings (even for numbers, booleans, etc.).
+
+```json
+{
+  "payload": {
+    "entry1": "value1",
+    "entry2": "another value?"
+  }
+}
+```
+
 ---
 
 # Gradle Dependency
@@ -52,7 +66,7 @@ Add this to your module's `build.gradle` file:
 dependencies {
 	// ... other dependencies
 
-	compile 'com.afollestad:udpdiscovery:1.0.0'
+	compile 'com.afollestad:udpdiscovery:1.1.0'
 }
 ```
 
@@ -94,6 +108,13 @@ Discovery.instance(this)
     });
 ```
 
+You can also choose to automatically respond to all, if you don't want to do any filtering.
+
+```java
+Discovery.instance(this)
+    respondToAll();
+```
+
 ### Error Handling
 
 As seen in the sample project, you can provide a second callback to the `discover` and `respond`
@@ -115,7 +136,24 @@ Discovery.instance(this)
     });
 ```
 
-Notice that you can also chain the `discover` and `respond` methods.
+Even `respondToAll()` has an optional error handler parameter.
+
+Notice that you can also chain methods.
+
+### Messaging
+
+You can to exchange short messages directly with entities.
+
+```java
+Entity recipient = ...
+Map<String, String> payload = new HashMap<>();
+payload.put("body", "Hello!");
+
+Discovery.instance(this)
+    .message(recipient, payload);
+```
+
+An optional third parameter accepts an error listener; without that, an exception is thrown if an error occurs during sending.
 
 ### Cleanup
 
