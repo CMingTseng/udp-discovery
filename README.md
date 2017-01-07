@@ -1,7 +1,7 @@
 # UDP Discovery
 
-This is very simple and easy to use library, allowing you to discover other devices on a Wifi
-network that implement the same basic protocol.
+This is very simple and easy to use protocol, allowing you to discover other devices on a Wifi
+network that all agree on protocol implementation. This library lets you do so on Android with few lines of code.
 
 ---
 
