@@ -48,6 +48,8 @@ the values need to be strings (even for numbers, booleans, etc.).
 }
 ```
 
+**The overall JSON needs to be 1024 bytes or less, including the brackets, quotes, etc.**
+
 ---
 
 # Gradle Dependency
