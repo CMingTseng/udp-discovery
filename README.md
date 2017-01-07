@@ -157,6 +157,15 @@ Discovery.instance(this)
 
 An optional third parameter accepts an error listener; without that, an exception is thrown if an error occurs during sending.
 
+**The overall transmission needs to be 1024 bytes or less.** The above would look like this:
+
+```json
+{"payload":{"body":"Hello!"}}
+```
+
+That's only 29 characters; since they are latin characters, they will directly translate to 29 UTF-8 bytes.
+But, payloads could increase in size quickly if you're not careful.
+
 ### Cleanup
 
 When you are done with the library, e.g. when your app closes, you **should do cleanup**.
