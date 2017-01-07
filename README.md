@@ -10,6 +10,8 @@ network that implement the same basic protocol.
 This library uses a simple JSON protocol, over UDP (User Datagram Packets). UDP allows you to send
 packets over a Wifi network, including broadcasts which are sent to all connected devices.
 
+---
+
 ### Discovery Request
 
 When you send a discovery request, you broadcast a message that asks all devices on the network to
@@ -22,6 +24,8 @@ respond, making them visible to you.
 }
 ```
 
+---
+
 ### Discovery Response
 
 When you receive a discovery request, you can choose to send a response which makes you visible to
@@ -33,6 +37,8 @@ the requester. This is sent directly to the requester, *not* as a broadcast.
   "version": 1
 }
 ```
+
+---
 
 ### Short Message
 
@@ -78,6 +84,8 @@ dependencies {
 
 This library makes managing these messages and broadcasts easy, along with parsing the data.
 
+---
+
 ### Discovering Entities
 
 Discovering entities means finding other devices on that network.
@@ -96,6 +104,8 @@ You can manually send out further discovery requests with the refresh method:
 ```java
 Discovery.instance(this).refresh();
 ```
+
+---
 
 ### Responding to Entities
 
@@ -116,6 +126,8 @@ You can also choose to automatically respond to all, if you don't want to do any
 Discovery.instance(this)
     respondToAll();
 ```
+
+---
 
 ### Error Handling
 
@@ -142,6 +154,8 @@ Even `respondToAll()` has an optional error handler parameter.
 
 Notice that you can also chain methods.
 
+---
+
 ### Messaging
 
 You can to exchange short messages directly with entities.
@@ -165,6 +179,8 @@ An optional third parameter accepts an error listener; without that, an exceptio
 
 That's only 29 characters; since they are latin characters, they will directly translate to 29 UTF-8 bytes.
 But, payloads could increase in size quickly if you're not careful.
+
+---
 
 ### Cleanup
 
